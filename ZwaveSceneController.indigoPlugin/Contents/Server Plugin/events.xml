@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<Events>
+	<Event id="cmdReceived">
+		<Name>Scene Command Received</Name>
+		<ConfigUI>
+			<Field id="label1" type="label">
+				<Label>The address of your device, as well as button ID and actions, can be found by enabling debug mode for this plugin.</Label>
+			</Field>
+			<Field id="label2" type="label">
+				<Label>Some devices, such as Remotec ZRC-90 Scene Master, use logical buttons and actions. Others, such as the BeNext Scene Controller, report buttons 1-8 when you single-click and buttons 9-16 when double-click the same buttons.</Label>
+			</Field>
+			<Field id="deviceAddress" type="menu">
+				<Label>Remote Address:</Label>
+				<List class="indigo.devices" filter="indigo.zwave"/>
+			</Field>
+			<Field id="deviceButton" type="textfield">
+				<Label>Button ID:</Label>
+			</Field>
+			<Field id="deviceAction" type="menu">
+				<List>
+					<Option value="0">Click</Option>
+					<Option value="1">Double-Click</Option>
+					<Option value="2">Triple-Click</Option>
+					<Option value="3">Quadruple-Click</Option>
+					<Option value="4">Quintuple-Click</Option>
+					<Option value="a">---</Option>
+					<Option value="5">Hold    (*Central Scene mode)</Option>
+					<Option value="6">Release</Option>
+					<Option value="b">---</Option>
+					<Option value="7">Brighten Start (*Basic Scene mode)</Option>
+					<Option value="8">Brighten Stop</Option>
+					<Option value="9">Dim Start</Option>
+					<Option value="10">Dim Stop</Option>
+				</List>
+				<Label>Action:</Label>
+			</Field>
+			<Field id="label3" type="label">
+				<Label>*ZWave Plus modules support a new mode called Central Scenes and this is usually the default.  Older modules only support Basic Scenes.</Label>
+			</Field>
+	</ConfigUI>
+	</Event>
+</Events>

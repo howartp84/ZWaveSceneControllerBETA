@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+
+<Devices>
+	<!-- This custom device illustrates how a plugin can update custom device
+	states which can be used in Device State Changed triggers, conditionals,
+	and inspected on Control Pages. The python runConcurrentThread() method
+	will update the states every second.
+	-->
+	<Device type="custom" id="sceneController">
+		<Name>Scene Controller</Name>
+		<ConfigUI>
+			<Field id="deviceId" type="menu">
+				<Label>ZWave Controller:</Label>
+				<List class="indigo.devices" filter="indigo.zwave"/>
+			</Field>
+		</ConfigUI>
+		<States>
+			<State id="currentScene">
+				<ValueType>String</ValueType>
+				<TriggerLabel>Current Scene</TriggerLabel>
+				<ControlPageLabel>Current Scene</ControlPageLabel>
+			</State>
+<!--			<State id="lastLevel">
+				<ValueType>Integer</ValueType>
+				<TriggerLabel>Last Level</TriggerLabel>
+				<ControlPageLabel>Last Level</ControlPageLabel>
+			</State>-->
+			<State id="repeatCount">
+				<ValueType>Integer</ValueType>
+				<TriggerLabel>Repeat Count</TriggerLabel>
+				<ControlPageLabel>Repeat Count</ControlPageLabel>
+			</State>
+			<State id="repeatStart">
+				<ValueType>String</ValueType>
+				<TriggerLabel>Repeat Start</TriggerLabel>
+				<ControlPageLabel>Repeat Start</ControlPageLabel>
+			</State>
+		</States>
+		<UiDisplayStateId>currentScene</UiDisplayStateId>
+	</Device>
+
+</Devices>

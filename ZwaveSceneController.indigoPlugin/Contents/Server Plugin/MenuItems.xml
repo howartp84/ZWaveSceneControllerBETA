@@ -1,0 +1,101 @@
+<?xml version="1.0"?>
+<!-- If your plugin wants to add menu items to it's submenu off the new Extensions menu,
+	 define them here. Each should have a unique menu id, a Name, and an MenuItem. The last
+	 is a method name in your python file that will be called when the user selects that
+	 menu item. Note - nothing will be returned to the client, so if you need to communicate
+	 back to the user you can post information into the Event Log.
+-->
+<MenuItems>
+	<!--
+	<MenuItem id="testGet1">
+		<Name>Test Get Button 1</Name>
+		<CallbackMethod>testGet1</CallbackMethod>
+	</MenuItem>
+
+	<MenuItem id="testGet2">
+		<Name>Test Get Button 2</Name>
+		<CallbackMethod>testGet2</CallbackMethod>
+	</MenuItem>
+
+	<MenuItem id="testGet3">
+		<Name>Test Get Button 3</Name>
+		<CallbackMethod>testGet3</CallbackMethod>
+	</MenuItem>
+
+	<MenuItem id="testSet1">
+		<Name>Test Set Button 1</Name>
+		<CallbackMethod>testSet1</CallbackMethod>
+	</MenuItem>
+
+	<MenuItem id="testSet2">
+		<Name>Test Set Button 2</Name>
+		<CallbackMethod>testSet2</CallbackMethod>
+	</MenuItem>
+
+	<MenuItem id="testSet3">
+		<Name>Test Set Button 3</Name>
+		<CallbackMethod>testSet3</CallbackMethod>
+	</MenuItem>
+-->
+	<MenuItem id="configureDev">
+		<Name>Setup scene controller</Name>
+		<CallbackMethod>confController</CallbackMethod>
+		<ConfigUI>
+			<Field id="deviceId" type="menu">
+				<Label>Controller:</Label>
+				<List class="indigo.devices" filter="self"/>
+			</Field>
+			<Field id="modelNo" type="menu">
+				<Label>Controller model:</Label>
+				<List>
+					<Option value="RFWC5">Cooper RFWC5</Option>
+					<Option value="ZWNSC7">Enerwave ZWN-SC7</Option>
+				</List>
+			</Field>
+		</ConfigUI>
+	</MenuItem>
+
+	<MenuItem id="cmdVersion">
+		<Name>Get command version</Name>
+		<CallbackMethod>cmdVersion</CallbackMethod>
+		<ConfigUI>
+			<Field id="deviceId" type="menu">
+				<Label>Controller:</Label>
+				<List class="indigo.devices" filter="self"/>
+			</Field>
+		</ConfigUI>
+	</MenuItem>
+
+<!--
+Following was for testing blinds for someone - shouldn't be live anymore
+	<MenuItem id="callHomePress">
+		<Name>Call Home Position (Press)</Name>
+		<CallbackMethod>callHomePress</CallbackMethod>
+	</MenuItem>
+
+	<MenuItem id="callHomeHold">
+		<Name>Call Home Position (Hold Release)</Name>
+		<CallbackMethod>callHomeHold</CallbackMethod>
+	</MenuItem>
+
+	<MenuItem id="callPosition">
+		<Name>Call Position</Name>
+		<CallbackMethod>callPosition</CallbackMethod>
+		<ConfigUI>
+			<Field id="position" type="menu" defaultValue="1">
+				<List>
+					<Option value="1">1</Option>
+					<Option value="50">50</Option>
+					<Option value="99">99</Option>
+					<Option value="255">Last Used</Option>
+				</List>
+			</Field>
+		</ConfigUI>
+	</MenuItem>
+-->
+	<!--<MenuItem id="testHex">
+		<Name>Test Hex</Name>
+		<CallbackMethod>testHex</CallbackMethod>
+	</MenuItem>
+	-->
+</MenuItems>

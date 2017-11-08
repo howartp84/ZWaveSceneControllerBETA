@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<Actions>
+	<Action id="getScene" deviceFilter="self">
+		<Name>Query active scene</Name>
+		<CallbackMethod>getScene</CallbackMethod>
+	</Action>
+
+	<Action id="setScene" deviceFilter="self">
+		<Name>Activate scene</Name>
+		<CallbackMethod>setScene</CallbackMethod>
+		<ConfigUI>
+			<Field id="sceneNo" type="menu" defaultValue="1">
+				<Label>Scene:</Label>
+				<List>
+					<Option value="1">1</Option>
+					<Option value="2">2</Option>
+					<Option value="3">3</Option>
+					<Option value="4">4</Option>
+					<Option value="5">5</Option>
+					<Option value="6">6</Option>
+					<Option value="7">7</Option>
+					<Option value="8">8</Option>
+					<Option value="9">9</Option>
+					<Option value="10">10</Option>
+				</List>
+			</Field>
+		</ConfigUI>
+	</Action>
+
+</Actions>
