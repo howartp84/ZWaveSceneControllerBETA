@@ -368,18 +368,37 @@ class Plugin(indigo.PluginBase):
 			self.debugLog(u"Removing button %s Associations" % (i))	#Remove associations for Group (aka Button)
 			codeStr = [133, 4, i]
 			indigo.zwave.sendRaw(device=indigoDev,cmdBytes=codeStr,sendMode=1)
+			
+			self.debugLog(u"Sleeping 5 seconds")
+			self.sleep(5)
 
 			self.debugLog(u"Setting button %s Associations" % (i))	#Associate Group (aka Button) i to node 1 (controller)
 			codeStr = [133, 1, i, 1]
 			indigo.zwave.sendRaw(device=indigoDev,cmdBytes=codeStr,sendMode=1)
 
+			self.debugLog(u"Sleeping 5 seconds")
+			self.sleep(5)
+			
 			self.debugLog(u"Setting button %s Parameters" % (i))	#Set level for Parameter (aka Button!) i to 0xFF ("On")
-			codeStr = [112, 3, i, 255]
+			codeStr = [112, 3, 1, i, 255]
 			indigo.zwave.sendRaw(device=indigoDev,cmdBytes=codeStr,sendMode=1)
 
+			self.debugLog(u"Sleeping 5 seconds")
+			self.sleep(5)
+			
 			self.debugLog(u"Setting button %s Scene No" % (i))	#Set Group (aka Button) i to activate Scene i, over 0 seconds. [Works for Enerwave]
 			codeStr = [45, 1, i, i, 0]
+			#codeStr = [2D, 1, i, i, 0]
 			indigo.zwave.sendRaw(device=indigoDev,cmdBytes=codeStr,sendMode=1)
+			
+			self.debugLog(u"Sleeping 5 seconds")
+			self.sleep(5)
+		
+		self.debugLog(u"Finished configuring device")
+
+
+
+
 
 		errorsDict = indigo.Dict()
 		return (True, valuesDict, errorsDict)
