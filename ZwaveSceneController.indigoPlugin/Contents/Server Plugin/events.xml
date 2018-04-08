@@ -31,6 +31,9 @@
 					<Option value="8">Brighten Stop</Option>
 					<Option value="9">Dim Start</Option>
 					<Option value="10">Dim Stop</Option>
+					<Option value="c">---</Option>
+					<Option value="11">On</Option>
+					<Option value="12">Off</Option>
 				</List>
 				<Label>Action:</Label>
 			</Field>

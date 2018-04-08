@@ -48,6 +48,8 @@ class Plugin(indigo.PluginBase):
 		self.nodeFromZed = dict()
 		self.nodeFromDev = dict()
 
+		self.delayFromNode = dict()
+
 	########################################
 	def startup(self):
 		self.debugLog(u"startup called -- subscribing to all incoming Z-Wave commands")
@@ -71,11 +73,13 @@ class Plugin(indigo.PluginBase):
 				indigo.server.log("Debug logging disabled")
 
 	def deviceStartComm(self, dev):
+		dev.stateListOrDisplayStateIdChanged()
 		if (dev.deviceTypeId == "sceneController"):
-			dev.stateListOrDisplayStateIdChanged()
 			devID = dev.id
 			zedID = dev.ownerProps['deviceId']
 			nodeID = indigo.devices[int(zedID)].ownerProps['address']
+
+			repeatDelay = dev.ownerProps.get('repeatDelay',0)
 
 			self.zedFromDev[int(devID)] = int(zedID)
 			self.zedFromNode[int(nodeID)] = int(zedID)
@@ -83,6 +87,8 @@ class Plugin(indigo.PluginBase):
 			self.devFromNode[int(nodeID)] = int(devID)
 			self.nodeFromZed[int(zedID)] = int(nodeID)
 			self.nodeFromDev[int(devID)] = int(nodeID)
+
+			self.delayFromNode[int(nodeID)] = int(repeatDelay)
 
 			self.controllerIDs.append(nodeID)
 
@@ -99,6 +105,8 @@ class Plugin(indigo.PluginBase):
 			self.nodeFromZed.pop(int(zedID),None)
 			self.nodeFromDev.pop(int(devID),None)
 
+			self.delayFromNode.pop(int(nodeID),None)
+
 			self.controllerIDs.remove(nodeID)
 
 	########################################
@@ -110,11 +118,11 @@ class Plugin(indigo.PluginBase):
 
 		bytes = byteListStr.split()
 
-		#if (int(bytes[5],16)) not in self.controllerIDs:
+		if (int(bytes[5],16)) not in self.controllerIDs:
 			#self.debugLog(u"Node %s is not a scene controller - ignoring" % (int(bytes[5],16)))
-			#return
-		#else:
-			#self.debugLog(u"Node ID %s found in controllerIDs" % (int(bytes[5],16)))
+			return
+		else:
+			self.debugLog(u"Node ID %s found in controllerIDs" % (int(bytes[5],16)))
 
 		if (int(bytes[5],16) == 34):			#Add node IDs here for debugging
 			self.debugLog(u"Raw RFWC5 34 command: %s" % (byteListStr))
@@ -122,9 +130,44 @@ class Plugin(indigo.PluginBase):
 		if (int(bytes[5],16) == 35):			#Add node IDs here for debugging
 			self.debugLog(u"Raw RFWC5 35 command: %s" % (byteListStr))
 
+		if (int(bytes[5],16) == 44):			#Add node IDs here for debugging
+			self.debugLog(u"Raw RFWC5 44 command: %s" % (byteListStr))
+
+		if (int(bytes[5],16) == 61):			#Add node IDs here for debugging
+			self.debugLog(u"Raw RFWC5 61 command: %s" % (byteListStr))
+
+		#######
+		#
+		# Action Map Description
+		#
+		#<List>
+			#<Option value="0">Click</Option>
+			#<Option value="1">Double-Click</Option>
+			#<Option value="2">Triple-Click</Option>
+			#<Option value="3">Quadruple-Click</Option>
+			#<Option value="4">Quintuple-Click</Option>
+			#<Option value="a">---</Option>
+			#<Option value="5">Hold    (*Central Scene mode)</Option>
+			#<Option value="6">Release</Option>
+			#<Option value="b">---</Option>
+			#<Option value="7">Brighten Start (*Basic Scene mode)</Option>
+			#<Option value="8">Brighten Stop</Option>
+			#<Option value="9">Dim Start</Option>
+			#<Option value="10">Dim Stop</Option>
+			#<Option value="c">---</Option>
+			#<Option value="11">On</Option>
+			#<Option value="12">Off</Option>
+		#</List>
+		#actions = ["-","Click","Double-Click","Brighten Start", "Dim Start", "Brighten Stop", "Dim Stop", "Triple-Click", "Quad-Click", "Quint-Click"]
+		#actionMap = {1:0, 2:1, 3:7, 4:9, 5:8, 6:10, 7:2, 8:3, 9:4}
+		#
+		#actions = ["Click","Release","Hold", "Double-Click", "Triple-Click", "Quad-Click", "Quint-Click"]
+		#actionMap = {0:0, 1:6, 2:5, 3:1, 4:2, 5:3, 6:4}
+
 		if (bytes[7] == "2B") and (bytes[8] == "01"): #Basic Scene
 			actions = ["-","Click","Double-Click","Brighten Start", "Dim Start", "Brighten Stop", "Dim Stop", "Triple-Click", "Quad-Click", "Quint-Click"]
 			actionMap = {1:0, 2:1, 3:7, 4:9, 5:8, 6:10, 7:2, 8:3, 9:4}
+			#ActionByte of 1 = Click, so actionMap[1] = actions[0], or {1:0, ...]
 			self.debugLog(u"-----")
 			self.debugLog(u"Basic Scene Command received:")
 			self.debugLog(u"Raw command: %s" % (byteListStr))
@@ -150,7 +193,7 @@ class Plugin(indigo.PluginBase):
 				button = str(int(bytes[9],16))[0:1]
 			self.debugLog(u"-----")
 
-			if (int(bytes[5],16)) in self.controllerIDs: #Full Scene support
+			if (int(bytes[5],16)) in self.controllerIDs: #Has dummy device
 				devID = self.devFromNode[int(bytes[5],16)]
 				dev = indigo.devices[int(devID)]
 				lastScene = dev.states['currentScene']
@@ -179,6 +222,7 @@ class Plugin(indigo.PluginBase):
 				self.debugLog(u"B10: %s" % (int(bytes[10],16)))
 			actions = ["Click","Release","Hold", "Double-Click", "Triple-Click", "Quad-Click", "Quint-Click"]
 			actionMap = {0:0, 1:6, 2:5, 3:1, 4:2, 5:3, 6:4}
+			#ActionByte of 0 = Click, so actionMap[0] = actions[0], or {0:0, ...]
 			self.debugLog(u"-----")
 			self.debugLog(u"Central Scene Command received:")
 			self.debugLog(u"Raw command: %s" % (byteListStr))
@@ -203,6 +247,98 @@ class Plugin(indigo.PluginBase):
 				self.updateDevScene(int(bytes[5],16),button,action)
 			self.fireHash = str(int(bytes[9],16))[0:1] + str(int(bytes[9],16))
 			self.debugLog(self.fireHash)
+
+		if (bytes[7] == "20") and (bytes[8] == "01"): #Basic Set On/Off
+			actions = ["Off","On"]
+			actionMap = {0:12, 1:11}
+			#ActionByte of 0 = Off,  so actionMap[0] = actions[12], or {0:12, ...]
+			#ActionByte of 255 = 1 = On, so actionMap[1] = actions[11], or {1:11, ...]  as we've mapped 1 to 255 further down
+			self.debugLog(u"-----")
+			self.debugLog(u"On/Off Command received:")
+			self.debugLog(u"Raw command: %s" % (byteListStr))
+			#self.debugLog(u"Address: %s" % (bytes[5])) #zero-based
+			self.debugLog(u"Node:      %s" % (int(bytes[5],16)))
+			self.debugLog(u"NodeID:    %s" % (nodeId))
+
+			actionRaw = int(bytes[9],16)
+			if (actionRaw == 255):
+				actionRaw = 1
+			self.debugLog(u"ActionRaw: %s" % (actionRaw))
+			self.debugLog(u"Button:    1")
+			self.debugLog(u"ActionID:  %s" % (actionMap[actionRaw]))
+			self.debugLog(u"Action:    %s" % (actions[actionRaw]))
+			action = str(actionMap[int(actionRaw)])
+			button = str(1)
+			
+			if (int(bytes[5],16)) in self.controllerIDs: #Has dummy device
+				devID = self.devFromNode[int(bytes[5],16)]
+				dev = indigo.devices[int(devID)]
+				#lastScene = dev.states['currentScene']
+				repeatCount = dev.states['repeatCount']
+				repeatStart = dev.states['repeatStart']
+				if (repeatStart == ""):
+					repeatStart = 0
+				timeDif = time.time() - float(repeatStart)
+				repeatDelay = self.delayFromNode[int(bytes[5],16)]
+				if (timeDif < repeatDelay):
+					#Ignore command
+					dev.updateStateOnServer("repeatCount", repeatCount+1)
+				else:
+					#Update time of last successful command, and trigger it
+					dev.updateStateOnServer("repeatCount", 0)
+					dev.updateStateOnServer("repeatStart", time.time())
+					self.triggerEvent("cmdReceived",bytes[5],button,action)
+					self.updateDevScene(int(bytes[5],16),button,action)
+			else:
+				self.triggerEvent("cmdReceived",bytes[5],button,action)
+				self.updateDevScene(int(bytes[5],16),button,action)
+			self.debugLog(u"-----")
+
+		if (bytes[7] == "25") and (bytes[8] == "03"): #Switch Binary
+			actions = ["Off","On"]
+			actionMap = {0:12, 1:11}
+			#ActionByte of 0 = Off,  so actionMap[0] = actions[12], or {0:12, ...]
+			#ActionByte of 255 = 1 = On, so actionMap[1] = actions[11], or {1:11, ...]  as we've mapped 1 to 255 further down
+			self.debugLog(u"-----")
+			self.debugLog(u"On/Off Command received:")
+			self.debugLog(u"Raw command: %s" % (byteListStr))
+			#self.debugLog(u"Address: %s" % (bytes[5])) #zero-based
+			self.debugLog(u"Node:      %s" % (int(bytes[5],16)))
+			self.debugLog(u"NodeID:    %s" % (nodeId))
+
+			actionRaw = int(bytes[9],16)
+			if (actionRaw == 255):
+				actionRaw = 1
+			self.debugLog(u"ActionRaw: %s" % (actionRaw))
+			self.debugLog(u"Button:    1")
+			self.debugLog(u"ActionID:  %s" % (actionMap[actionRaw]))
+			self.debugLog(u"Action:    %s" % (actions[actionRaw]))
+			action = str(actionMap[int(actionRaw)])
+			button = str(1)
+
+			if (int(bytes[5],16)) in self.controllerIDs: #Has dummy device
+				devID = self.devFromNode[int(bytes[5],16)]
+				dev = indigo.devices[int(devID)]
+				#lastScene = dev.states['currentScene']
+				repeatCount = dev.states['repeatCount']
+				repeatStart = dev.states['repeatStart']
+				if (repeatStart == ""):
+					repeatStart = 0
+				timeDif = time.time() - float(repeatStart)
+				repeatDelay = self.delayFromNode[int(bytes[5],16)]
+				if (timeDif < repeatDelay):
+					#Ignore command
+					dev.updateStateOnServer("repeatCount", repeatCount+1)
+				else:
+					#Update time of last successful command, and trigger it
+					dev.updateStateOnServer("repeatCount", 0)
+					dev.updateStateOnServer("repeatStart", time.time())
+					self.triggerEvent("cmdReceived",bytes[5],button,action)
+					self.updateDevScene(int(bytes[5],16),button,action)
+			else:
+				self.triggerEvent("cmdReceived",bytes[5],button,action)
+				self.updateDevScene(int(bytes[5],16),button,action)
+			self.debugLog(u"-----")
 
 		if (bytes[7] == "2C") and (bytes[8] == "02"): #Scene Actuator Conf Get (probably from Enerwave)
 			self.debugLog(u"-----")
@@ -368,7 +504,7 @@ class Plugin(indigo.PluginBase):
 			self.debugLog(u"Removing button %s Associations" % (i))	#Remove associations for Group (aka Button)
 			codeStr = [133, 4, i]
 			indigo.zwave.sendRaw(device=indigoDev,cmdBytes=codeStr,sendMode=1)
-			
+
 			self.debugLog(u"Sleeping 5 seconds")
 			self.sleep(5)
 
@@ -378,22 +514,22 @@ class Plugin(indigo.PluginBase):
 
 			self.debugLog(u"Sleeping 5 seconds")
 			self.sleep(5)
-			
+
 			self.debugLog(u"Setting button %s Parameters" % (i))	#Set level for Parameter (aka Button!) i to 0xFF ("On")
 			codeStr = [112, 3, 1, i, 255]
 			indigo.zwave.sendRaw(device=indigoDev,cmdBytes=codeStr,sendMode=1)
 
 			self.debugLog(u"Sleeping 5 seconds")
 			self.sleep(5)
-			
+
 			self.debugLog(u"Setting button %s Scene No" % (i))	#Set Group (aka Button) i to activate Scene i, over 0 seconds. [Works for Enerwave]
 			codeStr = [45, 1, i, i, 0]
 			#codeStr = [2D, 1, i, i, 0]
 			indigo.zwave.sendRaw(device=indigoDev,cmdBytes=codeStr,sendMode=1)
-			
+
 			self.debugLog(u"Sleeping 5 seconds")
 			self.sleep(5)
-		
+
 		self.debugLog(u"Finished configuring device")
 
 

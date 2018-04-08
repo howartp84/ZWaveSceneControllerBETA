@@ -13,6 +13,9 @@
 				<Label>ZWave Controller:</Label>
 				<List class="indigo.devices" filter="indigo.zwave"/>
 			</Field>
+			<Field id="repeatDelay" type="textfield" defaultValue="0" tooltip="Ignore duplicate/repeated commands received within this number of seconds">
+				<Label>Repeat delay:</Label>
+			</Field>
 		</ConfigUI>
 		<States>
 			<State id="currentScene">
